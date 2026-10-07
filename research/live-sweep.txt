@@ -1,0 +1,325 @@
+=== per-feature function probe (funcs 0..5, short then long, empty params) ===
+
+-- feat idx=0x01 fid=0x0001 FeatureSet
+   fn0 short: 23 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 23 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x02 fid=0x0003 DeviceInfo v7
+   fn0 short: <ERR 02 INVALID_FEATURE> 59 1b 2f d5 00 0c 40 bd c0 a8 00 00 01 01 00   long: <ERR 02 INVALID_FEATURE> 59 1b 2f d5 00 0c 40 bd c0 a8 00 00 01 01 00
+   fn1 short: 01 42 4c 32 73 00 00 11 00 ab 39 96 e3 3c 95 00   long: 01 42 4c 32 73 00 00 11 00 ab 39 96 e3 3c 95 00
+   fn2 short: 32 36 32 31 4c 56 4c 37 33 56 39 38 00 00 00 00   long: 32 36 32 31 4c 56 4c 37 33 56 39 38 00 00 00 00
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x03 fid=0x0005 DeviceName v5
+   fn0 short: 12 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 12 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: 50 52 4f 20 58 32 20 53 55 50 45 52 53 54 52 49   long: 50 52 4f 20 58 32 20 53 55 50 45 52 53 54 52 49
+   fn2 short: <ERR 03 INVALID_VALUE> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: <ERR 03 INVALID_VALUE> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x04 fid=0x1d4b ?unknown-A
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x05 fid=0x0020 ?0x0020
+   fn0 short: .   long: .
+   fn1 short: .   long: .
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x06 fid=0x1004 UnifiedBattery v5
+   fn0 short: 0f 0f 02 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 0f 0f 02 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: 1d 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 1d 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn2 short: .   long: .
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x07 fid=0x2250 ?dpi-cluster
+   fn0 short: 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: .   long: .
+   fn2 short: .   long: .
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x08 fid=0x2251 ?dpi-cluster2
+   fn0 short: 01 00 18 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 01 00 18 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: .   long: .
+   fn2 short: .   long: .
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x09 fid=0x2202 AdjPtrSpeed
+   fn0 short: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: 00 05 0f 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 05 0f 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn2 short: 00 00 00 00 64 e0 01 00 c8 e0 02 01 f4 e0 05 03   long: 00 00 00 00 64 e0 01 00 c8 e0 02 01 f4 e0 05 03
+   fn3 short: 00 00 03 20 04 b0 03 20 09 60 0c 80 00 00 00 00   long: 00 00 03 20 04 b0 03 20 09 60 0c 80 00 00 00 00
+   fn4 short: 00 02 02 02 02 02 00 00 00 00 00 00 00 00 00 00   long: 00 02 02 02 02 02 00 00 00 00 00 00 00 00 00 00
+   fn5 short: 00 03 20 03 20 03 20 03 20 02 00 00 00 00 00 00   long: 00 03 20 03 20 03 20 03 20 02 00 00 00 00 00 00
+
+-- feat idx=0x0a fid=0x8090 ?8090-v3
+   fn0 short: .   long: .
+   fn1 short: -
+   fn2 short: 00 08 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 08 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x0b fid=0x80e0 ?80e0
+   fn0 short: .   long: .
+   fn1 short: .   long: .
+   fn2 short: .   long: .
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x0c fid=0x1b0c ?1b0c
+   fn0 short: 00 03 28 14 14 01 00 00 00 00 00 00 00 00 00 00   long: 00 03 28 14 14 01 00 00 00 00 00 00 00 00 00 00
+   fn1 short: -
+   fn2 short: 00 08 08 0c 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 08 08 0c 00 00 00 00 00 00 00 00 00 00 00 00
+   fn3 short: .   long: .
+   fn4 short: .   long: .
+   fn5 short: -
+
+-- feat idx=0x0d fid=0x8061 ?rate-ish
+   fn0 short: 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: 00 7f 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 7f 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn2 short: <ERR 03 INVALID_VALUE> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: <ERR 03 INVALID_VALUE> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x0e fid=0x8100 ?btnspy-ish
+   fn0 short: 01 08 01 05 01 05 10 00 ff 0a 04 00 00 00 00 00   long: 01 08 01 05 01 05 10 00 ff 0a 04 00 00 00 00 00
+   fn1 short: .   long: .
+   fn2 short: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn3 short: -
+   fn4 short: 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn5 short: 00 01 01 ff 00 02 00 ff 00 03 00 ff 00 04 00 ff   long: 00 01 01 ff 00 02 00 ff 00 03 00 ff 00 04 00 ff
+
+-- feat idx=0x0f fid=0x8110 ?onboard-ish
+   fn0 short: <ERR 05 LOW_RESOURCES> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   long: <ERR 05 LOW_RESOURCES> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   fn1 short: .   long: .
+   fn2 short: .   long: .
+   fn3 short: 01 02 03 04 05 00 00 00 00 00 00 00 00 00 00 00   long: 01 02 03 04 05 00 00 00 00 00 00 00 00 00 00 00
+   fn4 short: -   long: .
+   fn5 short: -
+
+-- feat idx=0x10 fid=0x1500 ?lighting-ish
+   fn0 short: .   long: .
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x11 fid=0x1801 ?18blk-01
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x12 fid=0x1802 ?18blk-02
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x13 fid=0x1803 ?18blk-03-v1
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x14 fid=0x1806 ?18blk-06-v8
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x15 fid=0x1817 ?18blk-17
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x16 fid=0x1805 ?18blk-05
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x17 fid=0x1830 ?18blk-30
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x18 fid=0x1877 ?18blk-77
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x19 fid=0x9403 ?9403
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x1a fid=0x1861 ?18blk-61-v1
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x1b fid=0x1890 ?18blk-90
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x1c fid=0x18a1 ?18blk-a1
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x1d fid=0x1e00 ADC-measure
+   fn0 short: .   long: .
+   fn1 short: .   long: .
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x1e fid=0x1e02 ?1e02
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x1f fid=0x1e22 ?1e22-v1
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x20 fid=0x1e30 ?1e30
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x21 fid=0x1602 ?1602
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x22 fid=0x1eb0 ?1eb0
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+-- feat idx=0x23 fid=0x18b1 ?18blk-b1
+   fn0 short: -
+   fn1 short: -
+   fn2 short: -
+   fn3 short: -
+   fn4 short: -
+   fn5 short: -
+
+=== DeviceInfo (idx 0x02) structured ===
+  fn0: 11 01 02 00 02 59 1b 2f d5 00 0c 40 bd c0 a8 00 00 01 01 00
+  fn1: 11 01 02 10 01 42 4c 32 73 00 00 11 00 ab 39 96 e3 3c 95 00
+  fn2: 11 01 02 20 32 36 32 31 4c 56 4c 37 33 56 39 38 00 00 00 00
+  fn3: -
+  fn1(=GetSerial?): 11 01 02 10 00 4d 50 4d 42 00 00 11 01 40 bd 96 e3 3c 95 00
+  fn2(modelId): 11 01 02 20 32 36 32 31 4c 56 4c 37 33 56 39 38 00 00 00 00
+
+=== UnifiedBattery (idx 0x06) structured ===
+  fn0 getStatus: 11 01 06 00 0f 0f 02 00 00 00 00 00 00 00 00 00 00 00 00 00
+  fn1 getCapability?: 11 01 06 10 1d 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+=== DeviceName (idx 0x03): length + chunks ===
+  fn0 getNameLength: 11 01 03 00 12 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  NAME = b'PRO X2 SUPERSTRIKE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
+=== 0x8061 (idx 0x0d) rate probe: try params 00..05 fn0 ===
+  fn0(p=0): 00 0f 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  fn0(p=1): 00 7f 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  fn0(p=2): -
+  fn0(p=3): -
+  fn0(p=4): -
+  fn0(p=5): -
+
+=== 0x2250/0x2251/0x2202 DPI cluster fn0..2 ===
+  ?dpi-cluster fn0 p=00 -> 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ?dpi-cluster fn0 p=01 -> 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ?dpi-cluster fn1 p=00 -> .
+  ?dpi-cluster fn1 p=01 -> 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ?dpi-cluster fn2 p=00 -> .
+  ?dpi-cluster fn2 p=01 -> .
+  ?dpi-cluster2 fn0 p=00 -> 01 00 18 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ?dpi-cluster2 fn0 p=01 -> 01 00 18 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ?dpi-cluster2 fn1 p=00 -> .
+  ?dpi-cluster2 fn1 p=01 -> .
+  ?dpi-cluster2 fn2 p=00 -> .
+  ?dpi-cluster2 fn2 p=01 -> 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  AdjPtrSpeed fn0 p=00 -> 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  AdjPtrSpeed fn0 p=01 -> 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  AdjPtrSpeed fn1 p=00 -> 00 05 0f 00 00 00 00 00 00 00 00 00 00 00 00 00
+  AdjPtrSpeed fn2 p=00 -> 00 00 00 00 64 e0 01 00 c8 e0 02 01 f4 e0 05 03
+
+=== Passive: gently MOVE NOTES — battery/status events seen while idle ===

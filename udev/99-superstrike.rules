@@ -1,0 +1,10 @@
+# Logitech G PRO X2 SUPERSTRIKE — userspace HID++ driver access
+# Receiver-paired (046d:c54d, WPID 40bd) and wired (046d:c0a8) nodes.
+# Grants the interactive seat user rw on the relevant hidraw nodes.
+
+# The paired-mouse HID device (dj child)
+KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="40bd", TAG+="uaccess"
+# Wired mode: the mouse as its own USB device
+KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c0a8", TAG+="uaccess"
+# Receiver itself (needed if driving through the receiver control interface)
+KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c54d", TAG+="uaccess"

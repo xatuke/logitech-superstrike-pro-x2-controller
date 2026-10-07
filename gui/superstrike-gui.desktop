@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=SUPERSTRIKE Control Panel
+Comment=Configure the Logitech G PRO X 2 SUPERSTRIKE mouse
+Exec=superstrike-gui
+Icon=input-mouse
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=mouse;logitech;dpi;haptics;superstrike;

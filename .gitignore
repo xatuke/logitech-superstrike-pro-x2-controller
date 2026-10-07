@@ -1,0 +1,11 @@
+# build output
+src/superstrikectl
+src/libss2k.so
+*.o
+__pycache__/
+
+# local-only material: third-party downloads, clones, tool logs, raw captures
+downloads/
+openrgb/
+.playwright-mcp/
+research/*.cap
