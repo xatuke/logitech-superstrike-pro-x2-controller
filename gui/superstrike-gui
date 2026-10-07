@@ -941,6 +941,10 @@ class App(Adw.Application):
         self.lib = lib
 
     def do_activate(self):
+        # libadwaita is drawn for Adwaita's icons; some third-party themes
+        # (elementary on GTK 4.22) render header-bar icons such as
+        # window-minimize blank
+        Gtk.Settings.get_default().set_property("gtk-icon-theme-name", "Adwaita")
         win = self.get_active_window() or Window(self, self.lib)
         win.present()
 
