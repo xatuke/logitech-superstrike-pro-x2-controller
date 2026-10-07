@@ -4,11 +4,12 @@ This project is a userspace driver and a control panel for the Logitech G
 PRO X2 SUPERSTRIKE gaming mouse. The mouse has hall-effect analog main
 buttons (HITS). Logitech does not supply Linux software for this mouse.
 
-The project has three parts:
+The project has four parts:
 
 - `libss2k` — a C11 driver library. It has no dependencies other than libc.
 - `superstrikectl` — a command line tool.
 - `superstrike-gui` — a GTK4/libadwaita control panel.
+- `superstrike-tray` — a system tray icon with quick controls.
 
 The driver supports these USB devices:
 
@@ -29,6 +30,10 @@ The full wire protocol is in [`docs/PROTOCOL.md`](docs/PROTOCOL.md).
 | Memory | Device |
 |---|---|
 | ![Onboard memory](docs/screenshots/memory.png) | ![Device information](docs/screenshots/device.png) |
+
+| System tray |
+|---|
+| ![Tray menu](docs/screenshots/tray.png) |
 
 ## Functions
 
@@ -58,11 +63,14 @@ starts or when you activate a profile. This resets the live settings.
   The driver operates together with these kernel drivers.
 - A C compiler and `make`.
 - For the GUI: Python 3, `python-gobject`, `gtk4` and `libadwaita`.
+- For the tray icon: `gtk3` and `libayatana-appindicator`, and a panel
+  with a StatusNotifierItem tray. XFCE, KDE Plasma, Cinnamon and MATE
+  have one. GNOME needs the AppIndicator extension.
 
 On Arch Linux, install the GUI packages with this command:
 
 ```sh
-sudo pacman -S python-gobject gtk4 libadwaita
+sudo pacman -S python-gobject gtk4 libadwaita gtk3 libayatana-appindicator
 ```
 
 ## Installation
@@ -125,6 +133,42 @@ The control panel has four pages:
 If the mouse does not answer, the control panel shows a message. Move the
 mouse to wake it. The control panel tries again automatically.
 
+## System tray and start at login
+
+The tray icon shows "X2" on a coloured tile:
+
+| Colour | Meaning |
+|---|---|
+| Blue | The mouse is connected. |
+| Orange | The battery is at 15% or less and does not charge. |
+| Grey | The tray cannot find the mouse, or the mouse does not answer. |
+
+Click the icon to open the menu. The menu shows the battery level and
+these quick controls:
+
+- DPI (the five stages of the active profile)
+- Polling rate
+- Actuation point, rapid trigger and haptic feedback (both buttons)
+- Surface mode
+- Profile
+
+The menu also has "Open Control Panel", "Start at login", "Refresh" and
+"Quit".
+
+To start the tray icon automatically when you log in, do one of these
+steps:
+
+- In the control panel, go to **Device** and set **Start at login** to on.
+- In the tray menu, select **Start at login**.
+
+The two controls use the same file:
+`~/.config/autostart/superstrike-tray.desktop`. When you set **Start at
+login** to on in the control panel, the tray icon also starts immediately.
+To start the tray icon manually, use `superstrike-tray`.
+
+The tray reads the mouse state again every 60 seconds and after each
+change. The GUI, the tray and the CLI can operate at the same time.
+
 ## Command line
 
 Commands that change the mouse need the `--yes` option.
@@ -164,7 +208,8 @@ Use `superstrikectl help` to see all commands and options.
 ```
 src/ss2k.h, ss2k.c     driver library (protocol and device functions)
 src/superstrikectl.c   command line tool
-gui/                   GTK4/libadwaita control panel and .desktop file
+gui/                   control panel (GTK4), tray icon (GTK3), shared
+                       Python binding (ss2k_binding.py), .desktop files
 udev/                  udev rule for seat access
 docs/PROTOCOL.md       reverse engineering notes and wire protocol
 docs/screenshots/      control panel screenshots

@@ -17,6 +17,7 @@
 #include <poll.h>
 #include <time.h>
 #include <ctype.h>
+#include <sys/file.h>
 
 const char *ss2k_hex(const uint8_t *b, size_t n)
 {
@@ -171,6 +172,10 @@ int ss2k_call(struct ss2k_dev *d, uint8_t fidx, uint8_t fn,
 	if (plen)
 		memcpy(req + 4, params, plen);
 
+	/* Serialise with other processes on this node (GUI + tray + CLI): software
+	 * ids only disambiguate within one process. Advisory, never fatal. */
+	int locked = flock(d->fd, LOCK_EX) == 0;
+
 	/* the radio link can drop a frame while waking; retry once */
 	int rc = -ETIMEDOUT;
 	for (int attempt = 0; attempt < 2; attempt++) {
@@ -183,6 +188,8 @@ int ss2k_call(struct ss2k_dev *d, uint8_t fidx, uint8_t fn,
 			break;
 		usleep(30 * 1000);
 	}
+	if (locked)
+		flock(d->fd, LOCK_UN);
 	return rc;
 }
 

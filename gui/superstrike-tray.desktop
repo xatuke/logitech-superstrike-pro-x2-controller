@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=SUPERSTRIKE Tray
+Comment=Tray icon with quick controls for the Logitech G PRO X2 SUPERSTRIKE
+Exec=superstrike-tray
+Icon=input-mouse
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=mouse;logitech;tray;superstrike;

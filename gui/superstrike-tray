@@ -1,0 +1,340 @@
+#!/usr/bin/python3
+"""superstrike-tray — system tray quick controls for the Logitech G PRO X 2
+SUPERSTRIKE (StatusNotifierItem via AyatanaAppIndicator3, GTK3).
+
+The icon is "X2" on a coloured tile: blue when connected, orange on low
+battery, grey when the mouse cannot be reached.
+"""
+import os
+import sys
+
+import gi
+
+gi.require_version("Gtk", "3.0")
+gi.require_version("AyatanaAppIndicator3", "0.1")
+from gi.repository import AyatanaAppIndicator3 as AppIndicator  # noqa: E402
+from gi.repository import Gio, GLib, Gtk  # noqa: E402
+
+_here = os.path.dirname(os.path.realpath(__file__))
+sys.path[:0] = [_here, os.path.join(_here, "..", "share", "superstrike")]
+from ss2k_binding import (  # noqa: E402
+    EACCES, ENODEV, MODE_HOST, MODE_ONBOARD, RATE_HZ, SURFACE_NAMES,
+    Mouse, Worker, autostart_enabled, load_library, pretty_profile_name,
+    read_state, set_autostart,
+)
+
+APP_ID = "io.github.superstrike.Tray"
+POLL_SECONDS = 60
+RETRY_SECONDS = 10
+LOW_BATTERY = 15
+
+ICON_COLORS = {"ok": "#3584e4", "low": "#e66100", "off": "#77767b"}
+ICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<rect x="2" y="2" width="60" height="60" rx="14" fill="{bg}"/>
+<text x="32" y="33" text-anchor="middle" dominant-baseline="central" fill="#ffffff"
+ font-family="Cantarell, Inter, 'DejaVu Sans', sans-serif" font-weight="800"
+ font-size="31" letter-spacing="-1">X2</text>
+</svg>
+"""
+
+
+def icon_dir():
+    base = os.environ.get("XDG_RUNTIME_DIR") or GLib.get_user_cache_dir()
+    path = os.path.join(base, "superstrike-tray")
+    os.makedirs(path, exist_ok=True)
+    for name, bg in ICON_COLORS.items():
+        with open(os.path.join(path, f"superstrike-x2-{name}.svg"), "w") as f:
+            f.write(ICON_SVG.format(bg=bg))
+    return path
+
+
+def control_panel_command():
+    sibling = os.path.join(_here, "superstrike-gui")
+    return sibling if os.access(sibling, os.X_OK) else "superstrike-gui"
+
+
+class Choice:
+    """A submenu of radio-style items whose state the tray sets itself."""
+
+    def __init__(self, tray, parent, title, count, on_pick):
+        self.tray, self.on_pick = tray, on_pick
+        self.item = Gtk.MenuItem(label=title)
+        self.menu = Gtk.Menu()
+        self.item.set_submenu(self.menu)
+        parent.append(self.item)
+        self.entries = []
+        for i in range(count):
+            e = Gtk.CheckMenuItem(label=str(i))
+            e.set_draw_as_radio(True)
+            e.connect("activate", self.picked, i)
+            self.menu.append(e)
+            self.entries.append(e)
+
+    def picked(self, entry, i):
+        if not self.tray.updating:
+            self.on_pick(i)
+
+    def show(self, labels, active, sensitive=True):
+        """labels: list (None hides the slot); active: index or None."""
+        for i, e in enumerate(self.entries):
+            label = labels[i] if i < len(labels) else None
+            e.set_visible(label is not None)
+            if label is not None:
+                e.set_label(label)
+            e.set_active(i == active)
+        self.item.set_sensitive(sensitive and any(lbl is not None for lbl in labels))
+
+
+class Tray(Gtk.Application):
+    def __init__(self, lib):
+        super().__init__(application_id=APP_ID, flags=Gio.ApplicationFlags.FLAGS_NONE)
+        self.lib = lib
+        self.mouse = Mouse(lib)
+        self.worker = Worker()
+        self.state = None
+        self.connected = False
+        self.updating = False
+        self.indicator = None
+
+    # ------------------------------------------------------------ setup
+    def do_activate(self):
+        if self.indicator:
+            return
+        self.hold()
+        self.indicator = AppIndicator.Indicator.new(
+            "superstrike-tray", "superstrike-x2-off", AppIndicator.IndicatorCategory.HARDWARE)
+        self.indicator.set_icon_theme_path(icon_dir())
+        self.indicator.set_title("PRO X2 SUPERSTRIKE")
+        self.indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+        self.indicator.set_menu(self.build_menu())
+        self.set_icon("off")
+        self.connect_device()
+        GLib.timeout_add_seconds(POLL_SECONDS, self.poll)
+
+    def build_menu(self):
+        menu = Gtk.Menu()
+        self.title_item = Gtk.MenuItem(label="PRO X2 SUPERSTRIKE")
+        self.title_item.set_sensitive(False)
+        menu.append(self.title_item)
+        self.status_item = Gtk.MenuItem(label="Looking for the mouse…")
+        self.status_item.set_sensitive(False)
+        menu.append(self.status_item)
+        menu.append(Gtk.SeparatorMenuItem())
+
+        self.dpi = Choice(self, menu, "DPI", 5, self.pick_dpi)
+        self.rate = Choice(self, menu, "Polling rate", 7, self.pick_rate)
+        self.act = Choice(self, menu, "Actuation point", 10, self.pick_actuation)
+        self.rt = Choice(self, menu, "Rapid trigger", 6, self.pick_rapid)
+        self.hap = Choice(self, menu, "Haptic feedback", 6, self.pick_haptics)
+        self.surface = Choice(self, menu, "Surface mode", 3, self.pick_surface)
+        self.profile = Choice(self, menu, "Profile", 8, self.pick_profile)
+        menu.append(Gtk.SeparatorMenuItem())
+
+        item = Gtk.MenuItem(label="Open Control Panel…")
+        item.connect("activate", lambda *_: self.open_panel())
+        menu.append(item)
+        self.autostart_item = Gtk.CheckMenuItem(label="Start at login")
+        self.autostart_item.set_active(autostart_enabled())
+        self.autostart_item.connect("toggled", self.on_autostart)
+        menu.append(self.autostart_item)
+        item = Gtk.MenuItem(label="Refresh")
+        item.connect("activate", lambda *_: self.refresh())
+        menu.append(item)
+        item = Gtk.MenuItem(label="Quit")
+        item.connect("activate", lambda *_: self.quit())
+        menu.append(item)
+        # some hosts announce the menu before showing it; take the chance to resync
+        menu.connect("show", lambda *_: self.refresh())
+        menu.show_all()
+        self.show_device_controls(False)
+        return menu
+
+    # ------------------------------------------------------------ device plumbing
+    def connect_device(self):
+        def work():
+            self.mouse.connect()
+            return read_state(self.mouse)
+        self.worker.submit(work, self.apply_state, self.connect_failed)
+
+    def connect_failed(self, e):
+        self.connected = False
+        rc = getattr(e, "rc", 0)
+        if rc == -EACCES:
+            msg = "No permission — install the udev rule"
+        elif rc == -ENODEV:
+            msg = "Mouse not found"
+        else:
+            msg = "Mouse not answering — move it to wake it"
+        self.show_offline(msg)
+        GLib.timeout_add_seconds(RETRY_SECONDS, self.retry)
+
+    def retry(self):
+        if not self.connected:
+            self.connect_device()
+        return GLib.SOURCE_REMOVE
+
+    def refresh(self):
+        if self.connected:
+            self.worker.submit(lambda: read_state(self.mouse), self.apply_state, self.call_failed)
+
+    def poll(self):
+        self.refresh()
+        return GLib.SOURCE_CONTINUE
+
+    def call_failed(self, e, what=None):
+        rc = getattr(e, "rc", 0)
+        if rc == -ENODEV:
+            self.connected = False
+            self.show_offline("Mouse disconnected")
+            GLib.timeout_add_seconds(RETRY_SECONDS, self.retry)
+        elif what:
+            self.status_item.set_label(f"{what} failed: {e}")
+        else:
+            self.status_item.set_label("Mouse not answering — move it to wake it")
+
+    def act_then_refresh(self, fn, what):
+        def work():
+            fn()
+            return read_state(self.mouse)
+        self.worker.submit(work, self.apply_state, lambda e: self.call_failed(e, what))
+
+    # ------------------------------------------------------------ state -> menu
+    def set_icon(self, kind):
+        desc = {"ok": "SUPERSTRIKE connected", "low": "SUPERSTRIKE battery low",
+                "off": "SUPERSTRIKE not connected"}[kind]
+        self.indicator.set_icon_full(f"superstrike-x2-{kind}", desc)
+
+    def show_device_controls(self, on):
+        for c in (self.dpi, self.rate, self.act, self.rt, self.hap, self.surface, self.profile):
+            c.item.set_sensitive(on)
+
+    def show_offline(self, msg):
+        self.set_icon("off")
+        self.status_item.set_label(msg)
+        self.show_device_controls(False)
+
+    def apply_state(self, st):
+        self.connected = True
+        self.state = st
+        self.updating = True
+        try:
+            self._apply_state(st)
+        finally:
+            self.updating = False
+
+    def _apply_state(self, st):
+        b = st["battery"]
+        low = b is not None and b.percent <= LOW_BATTERY and b.charging == 0
+        self.set_icon("low" if low else "ok")
+        if b is not None:
+            label = self.lib.ss2k_charging_label(b.charging).decode()
+            self.status_item.set_label(f"Battery {b.percent}% · {label}")
+        self.title_item.set_label(st["name"] or "PRO X2 SUPERSTRIKE")
+        self.autostart_item.set_active(autostart_enabled())
+        host = st["mode"] == MODE_HOST
+        prof = st["profile"]
+
+        # DPI: stages of the active profile (onboard: select stage; host: set live)
+        labels, active = [], None
+        if prof:
+            for i, (x, _y, _lod) in enumerate(prof["stages"]):
+                labels.append(f"{x} DPI" + (" (default)" if i == prof["default_stage"] else ""))
+            if host and st["dpi"]:
+                cur = st["dpi"].x_cur
+                active = next((i for i, (x, _, _) in enumerate(prof["stages"]) if x == cur), None)
+            elif not host:
+                active = st["stage"]
+        self.dpi.show(labels, active)
+
+        mask = st["rate_mask"] or 0
+        self.rate.show([f"{hz} Hz" if mask >> i & 1 else None for i, hz in enumerate(RATE_HZ)],
+                       st["rate"])
+
+        hits = st["hits"]
+
+        def common(get):
+            """The value both keys share, or None when they differ."""
+            vals = {get(h) for h in hits}
+            return vals.pop() if len(vals) == 1 else None
+
+        act = common(lambda h: h.actuation)
+        rt = common(lambda h: h.rapid if h.rapid_enabled else 0)
+        hap = common(lambda h: h.haptics)
+        have = bool(hits)
+        self.act.show([str(i + 1) for i in range(10)], act - 1 if act else None, have)
+        self.rt.show(["Off"] + [f"Sensitivity {i}" for i in range(1, 6)], rt, have)
+        self.hap.show(["Off"] + [str(i) for i in range(1, 6)], hap, have)
+        self.act.item.set_label("Actuation point" + ("" if act or not have else " (left ≠ right)"))
+
+        self.surface.show(SURFACE_NAMES, st["surface"], st["surface"] is not None)
+
+        profiles = st["profiles"]
+        self.profile.show([pretty_profile_name(p["name"], p["slot"]) for p in profiles],
+                          next((i for i, p in enumerate(profiles) if p["sector"] == st["current"]), None),
+                          not host)
+        self.profile.item.set_label("Profile (host mode)" if host else "Profile")
+
+    # ------------------------------------------------------------ menu -> device
+    def pick_dpi(self, i):
+        st = self.state
+        if not st or not st["profile"]:
+            return
+        if st["mode"] == MODE_ONBOARD:
+            self.act_then_refresh(lambda: self.mouse.stage_set(i), "DPI")
+        else:
+            x = st["profile"]["stages"][i][0]
+            lod = st["dpi"].lod if st["dpi"] and 1 <= st["dpi"].lod <= 3 else 2
+            self.act_then_refresh(lambda: self.mouse.dpi_set(x, lod), "DPI")
+
+    def pick_rate(self, i):
+        self.act_then_refresh(lambda: self.mouse.rate_set(i), "Polling rate")
+
+    def for_both_keys(self, act=-1, rt=-1, rt_on=-1, hap=-1):
+        def work():
+            for b in range(len(self.state["hits"]) if self.state else 2):
+                self.mouse.hits_set(b, act, rt, rt_on, hap)
+        return work
+
+    def pick_actuation(self, i):
+        self.act_then_refresh(self.for_both_keys(act=i + 1), "Actuation")
+
+    def pick_rapid(self, i):
+        fn = self.for_both_keys(rt_on=0) if i == 0 else self.for_both_keys(rt=i, rt_on=1)
+        self.act_then_refresh(fn, "Rapid trigger")
+
+    def pick_haptics(self, i):
+        self.act_then_refresh(self.for_both_keys(hap=i), "Haptics")
+
+    def pick_surface(self, i):
+        self.act_then_refresh(lambda: self.mouse.surface_set(i), "Surface mode")
+
+    def pick_profile(self, i):
+        sector = self.state["profiles"][i]["sector"]
+        self.act_then_refresh(lambda: self.mouse.profile_activate(sector), "Profile")
+
+    def on_autostart(self, item):
+        if self.updating:
+            return
+        try:
+            set_autostart(item.get_active())
+        except OSError as e:
+            self.status_item.set_label(f"Start at login failed: {e}")
+
+    def open_panel(self):
+        try:
+            GLib.spawn_async([control_panel_command()], flags=GLib.SpawnFlags.SEARCH_PATH)
+        except GLib.Error as e:
+            self.status_item.set_label(f"Could not open the control panel: {e.message}")
+
+
+def main():
+    try:
+        lib = load_library()
+    except OSError as e:
+        print(f"superstrike-tray: {e}", file=sys.stderr)
+        return 1
+    return Tray(lib).run(sys.argv)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
